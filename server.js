@@ -25,6 +25,10 @@ app.use('/api', jobRoute); // All job routes start with /api
 // Serve uploaded images statically
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+
+app.get("/", (req, res)=>{
+ res.send("Api Working...")
+})
 // Connect MongoDB and start server
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
