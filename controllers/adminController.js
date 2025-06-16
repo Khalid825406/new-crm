@@ -85,7 +85,7 @@ exports.assignJobToTechnician = async (req, res) => {
     await job.save();
 
     // ✅ Send WhatsApp Notification
-    const messageBody = `👨‍🔧 New Job Assigned!\n\nLocation: ${job.location}\nCustomer: ${job.customerName}\n\nPlease login to view and accept: https://your-domain.com/login`;
+    const messageBody = `👨‍🔧 New Job Assigned!\n\nLocation: ${job.location}\nCustomer: ${job.customerName}\n\nPlease login to view and accept: https://frontcrm-rho.vercel.app/login`;
 
     await client.messages.create({
       from: process.env.TWILIO_WHATSAPP_NUMBER,
