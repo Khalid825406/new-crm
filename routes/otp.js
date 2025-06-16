@@ -2,25 +2,25 @@ const express = require('express');
 const router = express.Router();
 const { sendOtp, verifyOtp } = require('../utils/twilio');
 
-// Helper function: India ke phone number ko E.164 format me convert kare
+
 function formatPhoneNumber(number) {
   if (!number) return null;
 
   const trimmed = number.trim();
 
-  // Agar number already + se start ho raha hai, to wahi return karo (assuming correct format)
+ 
   if (trimmed.startsWith('+')) return trimmed;
 
-  // Validate kare ki ye 10 digits ka number hai (India ke liye)
+
   if (!/^\d{10}$/.test(trimmed)) {
-    return null; // Invalid format
+    return null; 
   }
 
-  // +91 prefix add karo
+  
   return `+91${trimmed}`;
 }
 
-// OTP bhejne wala route
+
 router.post('/send-otp', async (req, res) => {
   const { phone } = req.body;
 
@@ -40,7 +40,7 @@ router.post('/send-otp', async (req, res) => {
   }
 });
 
-// OTP verify karne wala route
+
 router.post('/verify-otp', async (req, res) => {
   const { phone, code } = req.body;
 

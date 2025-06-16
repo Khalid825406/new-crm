@@ -4,7 +4,7 @@ const upload = require('../middleware/uploadMiddleware');
 const jobController = require('../controllers/jobController');
 const { verifyToken, authorizeRoles } = require('../middleware/authMiddleware');
 
-// Technician start work
+
 router.post(
   '/start-work/:jobId',
   verifyToken,
@@ -13,7 +13,7 @@ router.post(
   jobController.startWork
 );
 
-// Technician complete work
+
 router.post(
   '/complete-work/:jobId',
   verifyToken,

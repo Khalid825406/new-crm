@@ -1,12 +1,12 @@
-// controllers/adminController.js
+
 const User = require('../models/User');
 const Job = require('../models/Job');
 const twilio = require('twilio');
 
-// 🔐 Twilio client setup
+
 const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
-// Get all pending users
+
 exports.getPendingUsers = async (req, res) => {
   try {
     const users = await User.find({ approved: false, role: { $in: ['staff', 'technician'] } }).select('-password');
@@ -16,7 +16,6 @@ exports.getPendingUsers = async (req, res) => {
   }
 };
 
-// Approve user
 exports.approveUser = async (req, res) => {
   const userId = req.params.id;
   try {
@@ -32,7 +31,7 @@ exports.approveUser = async (req, res) => {
   }
 };
 
-// Reject (delete) user
+
 exports.rejectUser = async (req, res) => {
   const userId = req.params.id;
   try {
@@ -58,7 +57,7 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
-// 🔹 Get all approved technicians
+
 exports.getAllTechnicians = async (req, res) => {
   try {
     const technicians = await User.find({ role: 'technician', approved: true }).select('-password');
@@ -84,12 +83,12 @@ exports.assignJobToTechnician = async (req, res) => {
     job.status = 'Assigned';
     await job.save();
 
-    // ✅ Send WhatsApp Notification
-    const messageBody = `👨‍🔧 New Job Assigned!\n\nLocation: ${job.location}\nCustomer: ${job.customerName}\n\nPlease login to view and accept: https://frontcrm-rho.vercel.app/login`;
+   
+    const messageBody = `👨‍🔧 New Job Assigned!\n\nLocation: ${job.location}\nCustomer: ${job.customerName}\n\nPlease login to view and accept: https://frontcrm-kappa.vercel.app/login`;
 
     await client.messages.create({
       from: process.env.TWILIO_WHATSAPP_NUMBER,
-      to: `whatsapp:${technician.phone}`, // technician.phone should be in E.164 format, e.g., +919999999999
+      to: `whatsapp:${technician.phone}`, 
       body: messageBody
     });
 

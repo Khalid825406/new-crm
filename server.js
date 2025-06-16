@@ -21,9 +21,9 @@ app.use(express.json());
 // Route prefixes
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
-app.use('/api/user', userRoutes); // Dashboard route
+app.use('/api/user', userRoutes); 
 // Routes
-app.use('/api', jobRoute); // All job routes start with /api
+app.use('/api', jobRoute); 
 app.use('/api/technician', newStart); 
 
 // 🔐 OTP routes

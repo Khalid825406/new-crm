@@ -51,7 +51,7 @@ exports.login = async (req, res) => {
       { expiresIn: '24h' }
     );
 
-    // 👇 Send role along with token in response
+   
     res.json({ token, role: user.role });
   } catch (err) {
     res.status(500).json({ message: 'Server error' });

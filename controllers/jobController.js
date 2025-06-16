@@ -43,7 +43,7 @@ exports.updateJobStatus = async (req, res) => {
 
     const allowedStatuses = ['Assigned', 'Accepted', 'Rejected', 'In Progress', 'Completed'];
 
-    // Validate the incoming status
+
     if (!status || !allowedStatuses.includes(status)) {
       return res.status(400).json({ message: 'Invalid or missing status value' });
     }
@@ -54,7 +54,7 @@ exports.updateJobStatus = async (req, res) => {
       return res.status(404).json({ message: 'Job not found' });
     }
 
-    // Update status and push to timeline
+    
     job.status = status;
     job.statusTimeline.push({ status });
 
@@ -79,7 +79,7 @@ exports.startWork = async (req, res) => {
         status: 'In Progress',
         startWork: {
           image: imagePath,
-          remark: remarks, // ✅ note it's 'remark', not 'remarks' in schema
+          remark: remarks, 
           timestamp: new Date(),
         },
         $push: {
@@ -112,7 +112,7 @@ exports.completeWork = async (req, res) => {
         status: 'Completed',
         completion: {
           image: imagePath,
-          remark: remarks, // ✅ match schema
+          remark: remarks, 
           timestamp: new Date(),
         },
         $push: {

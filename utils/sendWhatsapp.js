@@ -6,7 +6,7 @@ const sendWhatsAppMessage = async (toPhone, message) => {
   try {
     await client.messages.create({
       from: process.env.TWILIO_WHATSAPP_NUMBER,
-      to: `whatsapp:${toPhone}`, // example: whatsapp:+919123456789
+      to: `whatsapp:${toPhone}`, 
       body: message,
     });
     console.log('✅ WhatsApp message sent');

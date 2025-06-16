@@ -6,14 +6,14 @@ const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const Job = require('../models/Job');
 const { verifyToken, isAdmin } = require('../middleware/authMiddleware');
 
-// ✅ Cloudinary Config
+
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// ✅ Multer + Cloudinary Storage
+
 const storage = new CloudinaryStorage({
   cloudinary,
   params: {
@@ -25,9 +25,6 @@ const storage = new CloudinaryStorage({
 
 const upload = multer({ storage });
 
-/**
- * POST: Create Job (Staff + Admin)
- */
 router.post('/jobs', verifyToken, upload.array('images', 5), async (req, res) => {
   try {
     const {
@@ -66,9 +63,7 @@ router.post('/jobs', verifyToken, upload.array('images', 5), async (req, res) =>
   }
 });
 
-/**
- * GET: Pending Jobs (Admin only)
- */
+
 router.get('/pending-jobs', verifyToken, isAdmin, async (req, res) => {
   try {
     const jobs = await Job.find({ approved: false, rejected: false });
@@ -78,9 +73,7 @@ router.get('/pending-jobs', verifyToken, isAdmin, async (req, res) => {
   }
 });
 
-/**
- * GET: All Jobs (Admin only)
- */
+
 router.get('/admin/all-jobs', verifyToken, isAdmin, async (req, res) => {
   try {
     const jobs = await Job.find().populate('createdBy', 'username role');
@@ -90,9 +83,7 @@ router.get('/admin/all-jobs', verifyToken, isAdmin, async (req, res) => {
   }
 });
 
-/**
- * POST: Approve Job (Admin only)
- */
+
 router.post('/admin/jobs/:id/approve', verifyToken, isAdmin, async (req, res) => {
   try {
     const job = await Job.findByIdAndUpdate(req.params.id, {
@@ -108,9 +99,7 @@ router.post('/admin/jobs/:id/approve', verifyToken, isAdmin, async (req, res) =>
   }
 });
 
-/**
- * POST: Reject Job (Admin only)
- */
+
 router.post('/admin/jobs/:id/reject', verifyToken, isAdmin, async (req, res) => {
   try {
     const job = await Job.findByIdAndUpdate(req.params.id, {
@@ -126,9 +115,7 @@ router.post('/admin/jobs/:id/reject', verifyToken, isAdmin, async (req, res) => 
   }
 });
 
-/**
- * PATCH: Update Status (Admin only)
- */
+
 router.patch('/jobs/:id/status', verifyToken, isAdmin, async (req, res) => {
   const { status } = req.body;
 
@@ -153,9 +140,7 @@ router.patch('/jobs/:id/status', verifyToken, isAdmin, async (req, res) => {
   }
 });
 
-/**
- * DELETE: Remove Job (Admin only)
- */
+
 router.delete('/admin/jobs/:id', verifyToken, isAdmin, async (req, res) => {
   try {
     const job = await Job.findByIdAndDelete(req.params.id);
@@ -169,9 +154,7 @@ router.delete('/admin/jobs/:id', verifyToken, isAdmin, async (req, res) => {
   }
 });
 
-/**
- * GET: Jobs created by logged-in staff
- */
+
 router.get('/jobs/staff/jobs', verifyToken, async (req, res) => {
   try {
     const jobs = await Job.find({ createdBy: req.user.id }).sort({ createdAt: -1 });
