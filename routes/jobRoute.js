@@ -1,28 +1,32 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
+const { v2: cloudinary } = require('cloudinary');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const Job = require('../models/Job');
 const { verifyToken, isAdmin } = require('../middleware/authMiddleware');
 
-// Multer setup for file uploads
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const dir = 'uploads/jobs';
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    cb(null, dir);
-  },
-  filename: function (req, file, cb) {
-    const ext = path.extname(file.originalname);
-    const filename = `${Date.now()}-${file.fieldname}${ext}`;
-    cb(null, filename);
-  }
+// ✅ Cloudinary Config
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
+
+// ✅ Multer + Cloudinary Storage
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: 'jobs',
+    allowed_formats: ['jpg', 'jpeg', 'png'],
+    transformation: [{ width: 1000, height: 1000, crop: 'limit' }],
+  },
+});
+
 const upload = multer({ storage });
 
 /**
- * Job create route - admin and staff can create jobs
+ * POST: Create Job (Staff + Admin)
  */
 router.post('/jobs', verifyToken, upload.array('images', 5), async (req, res) => {
   try {
@@ -37,7 +41,7 @@ router.post('/jobs', verifyToken, upload.array('images', 5), async (req, res) =>
       remarks
     } = req.body;
 
-    const imagePaths = req.files?.map(file => `/uploads/jobs/${file.filename}`) || [];
+    const imagePaths = req.files?.map(file => file.path) || [];
 
     const job = new Job({
       customerName,
@@ -51,7 +55,7 @@ router.post('/jobs', verifyToken, upload.array('images', 5), async (req, res) =>
       remarks,
       approved: false,
       rejected: false,
-     createdBy: req.user.id,
+      createdBy: req.user.id,
     });
 
     await job.save();
@@ -63,7 +67,7 @@ router.post('/jobs', verifyToken, upload.array('images', 5), async (req, res) =>
 });
 
 /**
- * Get all pending jobs (admin only)
+ * GET: Pending Jobs (Admin only)
  */
 router.get('/pending-jobs', verifyToken, isAdmin, async (req, res) => {
   try {
@@ -75,11 +79,11 @@ router.get('/pending-jobs', verifyToken, isAdmin, async (req, res) => {
 });
 
 /**
- * Get all jobs (admin only)
+ * GET: All Jobs (Admin only)
  */
 router.get('/admin/all-jobs', verifyToken, isAdmin, async (req, res) => {
   try {
-  const jobs = await Job.find().populate('createdBy', 'username role');
+    const jobs = await Job.find().populate('createdBy', 'username role');
     res.json(jobs);
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
@@ -87,7 +91,7 @@ router.get('/admin/all-jobs', verifyToken, isAdmin, async (req, res) => {
 });
 
 /**
- * Approve a job (admin only)
+ * POST: Approve Job (Admin only)
  */
 router.post('/admin/jobs/:id/approve', verifyToken, isAdmin, async (req, res) => {
   try {
@@ -105,7 +109,7 @@ router.post('/admin/jobs/:id/approve', verifyToken, isAdmin, async (req, res) =>
 });
 
 /**
- * Reject a job (admin only)
+ * POST: Reject Job (Admin only)
  */
 router.post('/admin/jobs/:id/reject', verifyToken, isAdmin, async (req, res) => {
   try {
@@ -123,7 +127,7 @@ router.post('/admin/jobs/:id/reject', verifyToken, isAdmin, async (req, res) => 
 });
 
 /**
- * Update job status (approve/reject) admin only
+ * PATCH: Update Status (Admin only)
  */
 router.patch('/jobs/:id/status', verifyToken, isAdmin, async (req, res) => {
   const { status } = req.body;
@@ -149,7 +153,9 @@ router.patch('/jobs/:id/status', verifyToken, isAdmin, async (req, res) => {
   }
 });
 
-// DELETE job by ID (admin only)
+/**
+ * DELETE: Remove Job (Admin only)
+ */
 router.delete('/admin/jobs/:id', verifyToken, isAdmin, async (req, res) => {
   try {
     const job = await Job.findByIdAndDelete(req.params.id);
@@ -164,7 +170,7 @@ router.delete('/admin/jobs/:id', verifyToken, isAdmin, async (req, res) => {
 });
 
 /**
- * Get jobs created by logged-in staff user (staff only)
+ * GET: Jobs created by logged-in staff
  */
 router.get('/jobs/staff/jobs', verifyToken, async (req, res) => {
   try {
@@ -175,6 +181,5 @@ router.get('/jobs/staff/jobs', verifyToken, async (req, res) => {
     res.status(500).json({ message: 'Error fetching your jobs' });
   }
 });
-
 
 module.exports = router;

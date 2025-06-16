@@ -10,6 +10,8 @@ const jobRoute = require('./routes/jobRoute');
 const authRoutes = require('./routes/authRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const userRoutes = require('./routes/userRoutes');
+const otpRoutes = require('./routes/otp');
+const newStart = require('./routes/newstart')
 
 const app = express();
 
@@ -22,7 +24,12 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/user', userRoutes); // Dashboard route
 // Routes
 app.use('/api', jobRoute); // All job routes start with /api
-// Serve uploaded images statically
+app.use('/api/technician', newStart); 
+
+// 🔐 OTP routes
+app.use('/api', otpRoutes); 
+
+
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 

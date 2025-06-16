@@ -1,5 +1,10 @@
 // controllers/adminController.js
 const User = require('../models/User');
+const Job = require('../models/Job');
+const twilio = require('twilio');
+
+// 🔐 Twilio client setup
+const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
 // Get all pending users
 exports.getPendingUsers = async (req, res) => {
@@ -53,3 +58,44 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
+// 🔹 Get all approved technicians
+exports.getAllTechnicians = async (req, res) => {
+  try {
+    const technicians = await User.find({ role: 'technician', approved: true }).select('-password');
+    res.json(technicians);
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to fetch technicians' });
+  }
+};
+
+exports.assignJobToTechnician = async (req, res) => {
+  const { jobId, technicianId } = req.body;
+
+  try {
+    const job = await Job.findById(jobId);
+    if (!job) return res.status(404).json({ message: 'Job not found' });
+
+    const technician = await User.findById(technicianId);
+    if (!technician || technician.role !== 'technician') {
+      return res.status(400).json({ message: 'Invalid technician' });
+    }
+
+    job.assignedTo = technicianId;
+    job.status = 'Assigned';
+    await job.save();
+
+    // ✅ Send WhatsApp Notification
+    const messageBody = `👨‍🔧 New Job Assigned!\n\nLocation: ${job.location}\nCustomer: ${job.customerName}\n\nPlease login to view and accept: https://your-domain.com/login`;
+
+    await client.messages.create({
+      from: process.env.TWILIO_WHATSAPP_NUMBER,
+      to: `whatsapp:${technician.phone}`, // technician.phone should be in E.164 format, e.g., +919999999999
+      body: messageBody
+    });
+
+    res.json({ message: 'Technician assigned and WhatsApp message sent' });
+  } catch (err) {
+    console.error('Error assigning technician:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};

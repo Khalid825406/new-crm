@@ -3,25 +3,33 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 exports.register = async (req, res) => {
-  const { username, password, role } = req.body;
+  const { username, password, role, phone } = req.body;
+
+  if (!username || !password || !role || !phone) {
+    return res.status(400).json({ message: 'All fields are required' });
+  }
 
   if (!['staff', 'technician'].includes(role)) {
-    return res.status(400).json({ message: 'Invalid role. Only staff or technician can register.' });
+    return res.status(400).json({ message: 'Invalid role selected' });
   }
 
   try {
     const existingUser = await User.findOne({ username });
-    if (existingUser) return res.status(400).json({ message: 'User already exists' });
+    if (existingUser) {
+      return res.status(400).json({ message: 'Username already taken' });
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ username, password: hashedPassword, role, approved: false });
+    const newUser = new User({ username, password: hashedPassword, phone, role });
     await newUser.save();
 
-    res.status(201).json({ message: 'Registration successful. Please wait for admin approval.' });
+    res.status(201).json({ message: 'Registered successfully. Awaiting admin approval.' });
   } catch (err) {
-    res.status(500).json({ message: 'Server error' });
+    console.error('Register Error:', err);
+    res.status(500).json({ message: 'Server error during registration' });
   }
 };
+
 
 exports.login = async (req, res) => {
   const { username, password } = req.body;
@@ -63,4 +71,3 @@ exports.checkApproval = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
-
