@@ -54,6 +54,7 @@ const jobSchema = new mongoose.Schema({
     image: String,
     remark: String,
     timestamp: Date,
+  
   },
 });
 

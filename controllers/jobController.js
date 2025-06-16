@@ -1,4 +1,6 @@
 const Job = require('../models/Job');
+const cloudinary = require('../utils/cloudinary');
+
 
 exports.getAssignedJobsWithStatus = async (req, res) => {
   try {
@@ -70,16 +72,24 @@ exports.updateJobStatus = async (req, res) => {
 exports.startWork = async (req, res) => {
   const { jobId } = req.params;
   const { remarks } = req.body;
-  const imagePath = req.file ? `/uploads/technician/${req.file.filename}` : '';
 
   try {
+    let imageUrl = '';
+
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: 'technician/start',
+      });
+      imageUrl = result.secure_url;
+    }
+
     const job = await Job.findByIdAndUpdate(
       jobId,
       {
         status: 'In Progress',
         startWork: {
-          image: imagePath,
-          remark: remarks, 
+          image: imageUrl,
+          remark: remarks,
           timestamp: new Date(),
         },
         $push: {
@@ -100,19 +110,28 @@ exports.startWork = async (req, res) => {
 };
 
 
+
 exports.completeWork = async (req, res) => {
   const { jobId } = req.params;
   const { remarks } = req.body;
-  const imagePath = req.file ? `/uploads/technician/${req.file.filename}` : '';
 
   try {
+    let imageUrl = '';
+
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: 'technician/complete',
+      });
+      imageUrl = result.secure_url;
+    }
+
     const job = await Job.findByIdAndUpdate(
       jobId,
       {
         status: 'Completed',
         completion: {
-          image: imagePath,
-          remark: remarks, 
+          image: imageUrl,
+          remark: remarks,
           timestamp: new Date(),
         },
         $push: {
@@ -131,4 +150,3 @@ exports.completeWork = async (req, res) => {
     res.status(500).json({ error: 'Complete work failed' });
   }
 };
-
