@@ -28,17 +28,17 @@ router.get('/pending-users', verifyToken, authorizeRoles('admin'), getPendingUse
 router.put('/approve-user/:id', verifyToken, authorizeRoles('admin'), approveUser);
 router.delete('/reject-user/:id', verifyToken, authorizeRoles('admin'), rejectUser);
 router.get('/all-users', verifyToken, authorizeRoles('admin'), getAllUsers);
-router.get('/all-technicians', verifyToken, authorizeRoles('admin'), getAllTechnicians);
-router.post('/assign-job', verifyToken, authorizeRoles('admin'), assignJobToTechnician);
+router.get('/all-technicians', verifyToken, authorizeRoles('admin','staff'), getAllTechnicians);
+router.post('/assign-job', verifyToken, authorizeRoles('admin','staff'), assignJobToTechnician);
 
 
-router.get('/assigned-jobs-status', verifyToken, authorizeRoles('admin', 'technician'), getAssignedJobsWithStatus);
+router.get('/assigned-jobs-status', verifyToken, authorizeRoles('admin', 'technician', 'staff'), getAssignedJobsWithStatus);
 
 
 router.get('/assigned-jobs', verifyToken, authorizeRoles('technician'), newgetAssignedJobs);
 
-router.post('/accept-job/:jobId', verifyToken, authorizeRoles('technician'), acceptJob);
-router.post('/reject-job/:jobId', verifyToken, authorizeRoles('technician'), rejectJob);
+router.post('/accept-job/:jobId', verifyToken, authorizeRoles('technician','staff'), acceptJob);
+router.post('/reject-job/:jobId', verifyToken, authorizeRoles('technician','staff'), rejectJob);
 router.post('/update-status/:jobId', verifyToken, authorizeRoles('technician'), updateJobStatus);
 
 module.exports = router;

@@ -12,6 +12,8 @@ const adminRoutes = require('./routes/adminRoutes');
 const userRoutes = require('./routes/userRoutes');
 const otpRoutes = require('./routes/otp');
 const newStart = require('./routes/newstart')
+const technicianRoutes = require('./routes/technicianRoutes')
+const staffRoutes = require('./routes/staffRoutes');
 
 const app = express();
 
@@ -25,9 +27,11 @@ app.use('/api/user', userRoutes);
 // Routes
 app.use('/api', jobRoute); 
 app.use('/api/technician', newStart); 
-
+app.use('/api/technician', technicianRoutes);
 // 🔐 OTP routes
-app.use('/api', otpRoutes); 
+app.use('/api', otpRoutes);
+
+app.use('/api/staff', staffRoutes);
 
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -39,9 +43,9 @@ app.get("/", (req, res)=>{
 // Connect MongoDB and start server
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
-    console.log('✅ MongoDB connected');
+    console.log('MongoDB connected');
     app.listen(process.env.PORT, () => {
-      console.log(`🚀 Server running on port ${process.env.PORT}`);
+      console.log(`Server running on port ${process.env.PORT}`);
     });
   })
-  .catch(err => console.error('❌ MongoDB connection error:', err));
+  .catch(err => console.error(' MongoDB connection error:', err));

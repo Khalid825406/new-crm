@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const jobSchema = new mongoose.Schema({
   customerName: String,
   customerPhone: String,
-  workType: String,
+  workType: { type: String, enum: ['Meet', 'Delivery', 'Collect','Return','Payment-Collect','Refund','Replacement','New Client Visit','For Service'], default: 'Meet' },
   reason: String,
   datetime: Date,
   location: String,
@@ -45,6 +45,9 @@ const jobSchema = new mongoose.Schema({
     ],
     default: [],
   },
+  assignedAt: Date,
+  acceptedAt: Date,
+  rejectedAt: Date,
   startWork: {
     image: String,
     remark: String,

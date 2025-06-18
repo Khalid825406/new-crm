@@ -18,7 +18,7 @@ const storage = new CloudinaryStorage({
   cloudinary,
   params: {
     folder: 'jobs',
-    allowed_formats: ['jpg', 'jpeg', 'png'],
+    allowed_formats: ['jpg', 'jpeg', 'png','avif','WebP'],
     transformation: [{ width: 1000, height: 1000, crop: 'limit' }],
   },
 });
@@ -27,6 +27,7 @@ const upload = multer({ storage });
 
 router.post('/jobs', verifyToken, upload.array('images', 5), async (req, res) => {
   try {
+    
     const {
       customerName,
       customerPhone,
@@ -74,7 +75,7 @@ router.get('/pending-jobs', verifyToken, isAdmin, async (req, res) => {
 });
 
 
-router.get('/admin/all-jobs', verifyToken, isAdmin, async (req, res) => {
+router.get('/admin/all-jobs', verifyToken, isAdmin , async (req, res) => {
   try {
     const jobs = await Job.find().populate('createdBy', 'username role');
     res.json(jobs);
@@ -164,5 +165,33 @@ router.get('/jobs/staff/jobs', verifyToken, async (req, res) => {
     res.status(500).json({ message: 'Error fetching your jobs' });
   }
 });
+
+
+
+
+router.get('/jobs/customers', verifyToken, async (req, res) => {
+  try {
+    const { query } = req.query;
+
+    if (!query) return res.json([]);
+
+    const matches = await Job.find({
+      customerName: { $regex: query, $options: 'i' }
+    }).limit(5);
+
+    const unique = {};
+    for (const job of matches) {
+      if (!unique[job.customerName]) {
+        unique[job.customerName] = job;
+      }
+    }
+
+    res.json(Object.values(unique));
+  } catch (err) {
+    console.error("Customer lookup error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 
 module.exports = router;

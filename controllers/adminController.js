@@ -81,6 +81,8 @@ exports.assignJobToTechnician = async (req, res) => {
 
     job.assignedTo = technicianId;
     job.status = 'Assigned';
+    job.assignedAt = new Date();
+    job.statusTimeline.push({ status: 'Assigned', timestamp: new Date() });
     await job.save();
 
    

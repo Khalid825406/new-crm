@@ -18,7 +18,8 @@ exports.acceptJob = async (req, res) => {
     const job = await Job.findById(req.params.jobId);
     if (!job) return res.status(404).json({ message: 'Job not found' });
     job.status = 'Accepted';
-    job.statusTimeline.push({ status: 'Accepted' });
+    job.acceptedAt = new Date();
+    job.statusTimeline.push({ status: 'Accepted', timestamp: new Date() });
     await job.save();
     res.json({ message: 'Accepted' });
   } catch (err) {
@@ -31,7 +32,8 @@ exports.rejectJob = async (req, res) => {
     const job = await Job.findById(req.params.jobId);
     if (!job) return res.status(404).json({ message: 'Job not found' });
     job.status = 'Rejected';
-    job.statusTimeline.push({ status: 'Rejected', reason: req.body.reason });
+    job.rejectedAt = new Date();
+    job.statusTimeline.push({ status: 'Rejected', reason: req.body.reason,timestamp: new Date(), });
     await job.save();
     res.json({ message: 'Rejected' });
   } catch (err) {
