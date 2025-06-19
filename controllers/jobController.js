@@ -4,14 +4,16 @@ const cloudinary = require('../utils/cloudinary');
 
 exports.getAssignedJobsWithStatus = async (req, res) => {
   try {
-    const jobs = await Job.find({ assignedTo: { $ne: null } })
+    const jobs = await Job.find({ assignedTo: req.user.id })
       .populate('assignedTo', 'username')
       .sort({ updatedAt: -1 });
+
     res.json(jobs);
   } catch (err) {
     res.status(500).json({ message: 'Error fetching jobs' });
   }
 };
+
 
 exports.acceptJob = async (req, res) => {
   try {
