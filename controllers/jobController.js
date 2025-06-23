@@ -6,14 +6,14 @@ exports.getAssignedJobsWithStatus = async (req, res) => {
   try {
     let query = {};
 
-    // If admin: fetch all assigned jobs
+    // Admin: sabhi assigned jobs
     if (req.user.role === 'admin') {
-      query = { assignedTo: { $ne: null } }; // all jobs that are assigned
+      query = { assignedTo: { $ne: null } };
     }
 
-    // If technician/staff: fetch only their own jobs
+    // Technician ya Staff: unka khud ka job
     else {
-      query = { assignedTo: req.user.id };
+      query = { assignedTo: new mongoose.Types.ObjectId(req.user.id) };
     }
 
     const jobs = await Job.find(query)
@@ -22,7 +22,7 @@ exports.getAssignedJobsWithStatus = async (req, res) => {
 
     res.json(jobs);
   } catch (err) {
-    console.error(err);
+    console.error('❌ Error fetching assigned jobs with status:', err);
     res.status(500).json({ message: 'Error fetching jobs' });
   }
 };
