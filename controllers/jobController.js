@@ -4,15 +4,29 @@ const cloudinary = require('../utils/cloudinary');
 
 exports.getAssignedJobsWithStatus = async (req, res) => {
   try {
-    const jobs = await Job.find({ assignedTo: req.user.id })
+    let query = {};
+
+    // If admin: fetch all assigned jobs
+    if (req.user.role === 'admin') {
+      query = { assignedTo: { $ne: null } }; // all jobs that are assigned
+    }
+
+    // If technician/staff: fetch only their own jobs
+    else {
+      query = { assignedTo: req.user.id };
+    }
+
+    const jobs = await Job.find(query)
       .populate('assignedTo', 'username')
       .sort({ updatedAt: -1 });
 
     res.json(jobs);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: 'Error fetching jobs' });
   }
 };
+
 
 
 exports.acceptJob = async (req, res) => {
