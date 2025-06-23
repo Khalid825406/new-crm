@@ -1,19 +1,16 @@
 const Job = require('../models/Job');
 const cloudinary = require('../utils/cloudinary');
+const mongoose = require('mongoose'); // ✅ This line is required
 
 
 exports.getAssignedJobsWithStatus = async (req, res) => {
   try {
     let query = {};
 
-    // Admin: sabhi assigned jobs
-    if (req.user.role === 'admin') {
+    if (req.user.role === 'admin' || req.user.role === 'staff') {
       query = { assignedTo: { $ne: null } };
-    }
-
-    // Technician ya Staff: unka khud ka job
-    else {
-      query = { assignedTo: new mongoose.Types.ObjectId(req.user.id) };
+    } else {
+      query = { assignedTo: req.user.id };
     }
 
     const jobs = await Job.find(query)
@@ -22,10 +19,11 @@ exports.getAssignedJobsWithStatus = async (req, res) => {
 
     res.json(jobs);
   } catch (err) {
-    console.error('❌ Error fetching assigned jobs with status:', err);
+    console.error('❌ Error in getAssignedJobsWithStatus:', err);
     res.status(500).json({ message: 'Error fetching jobs' });
   }
 };
+
 
 
 
