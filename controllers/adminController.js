@@ -74,12 +74,12 @@ exports.assignJobToTechnician = async (req, res) => {
     const job = await Job.findById(jobId);
     if (!job) return res.status(404).json({ message: 'Job not found' });
 
-    const technician = await User.findById(technicianId);
-    if (!technician || technician.role !== 'technician') {
-      return res.status(400).json({ message: 'Invalid technician' });
+    const assignee = await User.findById(technicianId);
+    if (!assignee || !['technician', 'staff'].includes(assignee.role)) {
+      return res.status(400).json({ message: 'Invalid technician or staff' });
     }
 
-    // ✅ Remove old 'Rejected' entries
+    // ✅ Clear any previous 'Rejected' status
     job.statusTimeline = job.statusTimeline.filter(entry => entry.status !== 'Rejected');
 
     job.assignedTo = technicianId;
@@ -89,17 +89,20 @@ exports.assignJobToTechnician = async (req, res) => {
 
     await job.save();
 
-    const messageBody = `👨‍🔧 New Job Assigned!\n\nLocation: ${job.location}\nCustomer: ${job.customerName}\n\nPlease login to view and accept: https://frontcrm-kappa.vercel.app/login`;
+    // ✅ Optional WhatsApp Message if phone exists and starts with +
+    if (assignee.phone && assignee.phone.startsWith('+')) {
+      const messageBody = `👨‍🔧 New Job Assigned!\n\nLocation: ${job.location}\nCustomer: ${job.customerName}\n\nPlease login to view and accept: https://frontcrm-kappa.vercel.app/login`;
 
-    await client.messages.create({
-      from: process.env.TWILIO_WHATSAPP_NUMBER,
-      to: `whatsapp:${technician.phone}`, 
-      body: messageBody
-    });
+      await client.messages.create({
+        from: process.env.TWILIO_WHATSAPP_NUMBER,
+        to: `whatsapp:${assignee.phone}`,
+        body: messageBody
+      });
+    }
 
-    res.json({ message: 'Technician assigned and WhatsApp message sent' });
+    res.json({ message: 'Job assigned successfully' });
   } catch (err) {
-    console.error('Error assigning technician:', err);
+    console.error('Error assigning job:', err);
     res.status(500).json({ message: 'Server error' });
   }
 };
