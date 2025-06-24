@@ -4,6 +4,7 @@ const jobSchema = new mongoose.Schema({
   customerName: String,
   customerPhone: String,
   workType: { type: String },
+  Department: { type: String },
   reason: String,
   datetime: Date,
   location: String,

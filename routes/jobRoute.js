@@ -27,11 +27,11 @@ const upload = multer({ storage });
 
 router.post('/jobs', verifyToken, upload.array('images', 5), async (req, res) => {
   try {
-    
     const {
       customerName,
       customerPhone,
       workType,
+      Department,
       reason,
       datetime,
       location,
@@ -45,6 +45,7 @@ router.post('/jobs', verifyToken, upload.array('images', 5), async (req, res) =>
       customerName,
       customerPhone,
       workType,
+      Department,
       reason,
       datetime,
       location,

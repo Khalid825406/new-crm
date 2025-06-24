@@ -60,7 +60,7 @@ exports.getAllUsers = async (req, res) => {
 
 exports.getAllTechnicians = async (req, res) => {
   try {
-    const technicians = await User.find({ role: 'technician', approved: true }).select('-password');
+    const technicians = await User.find({ role: { $in: ['technician', 'staff'] } }).select('-password');
     res.json(technicians);
   } catch (err) {
     res.status(500).json({ message: 'Failed to fetch technicians' });
@@ -79,13 +79,16 @@ exports.assignJobToTechnician = async (req, res) => {
       return res.status(400).json({ message: 'Invalid technician' });
     }
 
+    // ✅ Remove old 'Rejected' entries
+    job.statusTimeline = job.statusTimeline.filter(entry => entry.status !== 'Rejected');
+
     job.assignedTo = technicianId;
     job.status = 'Assigned';
     job.assignedAt = new Date();
     job.statusTimeline.push({ status: 'Assigned', timestamp: new Date() });
+
     await job.save();
 
-   
     const messageBody = `👨‍🔧 New Job Assigned!\n\nLocation: ${job.location}\nCustomer: ${job.customerName}\n\nPlease login to view and accept: https://frontcrm-kappa.vercel.app/login`;
 
     await client.messages.create({

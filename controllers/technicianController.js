@@ -1,13 +1,18 @@
 const Job = require('../models/Job');
 const User = require('../models/User');
 
-exports.getTechnicianAchievements = async (req, res) => {
+exports.getAllUserAchievements = async (req, res) => {
   try {
-    const technicians = await User.find({ role: 'technician' });
-
+    const users = await User.find({ role: { $in: ['technician', 'staff'] } });
     const leaderboard = await Promise.all(
-      technicians.map(async (tech) => {
-        const jobs = await Job.find({ assignedTo: tech._id });
+      users.map(async (user) => {
+        let jobs = [];
+
+        if (user.role === 'technician') {
+          jobs = await Job.find({ assignedTo: user._id });
+        } else if (user.role === 'staff') {
+          jobs = await Job.find({ assignedBy: user._id }); // make sure this field exists
+        }
 
         const completedJobs = jobs.filter(j => j.status === 'Completed');
         const rejectedJobs = jobs.filter(j => j.status === 'Rejected');
@@ -27,22 +32,31 @@ exports.getTechnicianAchievements = async (req, res) => {
         const avgResponseTimeMins = responseTimes.length ? (responseTimes.reduce((a, b) => a + b) / responseTimes.length).toFixed(1) : 0;
         const avgCompletionTimeMins = workDurations.length ? (workDurations.reduce((a, b) => a + b) / workDurations.length).toFixed(1) : 0;
         const rejectionRate = jobs.length ? ((rejectedJobs.length / jobs.length) * 100).toFixed(1) + '%' : '0%';
-        const score = completedJobs.length * 10 - responseTimes.length * 0.5 - rejectedJobs.length * 5;
+
+        // Score formula
+        let score;
+        if (user.role === 'technician') {
+          score = completedJobs.length * 10 - responseTimes.length * 0.5 - rejectedJobs.length * 5;
+        } else {
+          // Staff ke liye different logic
+          score = jobs.length * 5 - rejectedJobs.length * 3;
+        }
 
         return {
-          technicianId: tech._id,
-          name: tech.username,
+          userId: user._id,
+          name: user.username,
+          role: user.role,
+          assignedJobs: jobs.length,
           completedJobs: completedJobs.length,
           rejectionRate,
           avgResponseTimeMins,
           avgCompletionTimeMins,
-          score
+          score,
         };
       })
     );
 
     leaderboard.sort((a, b) => b.score - a.score);
-
     res.json(leaderboard);
   } catch (err) {
     console.error(err);

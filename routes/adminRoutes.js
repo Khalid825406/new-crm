@@ -35,10 +35,10 @@ router.post('/assign-job', verifyToken, authorizeRoles('admin','staff'), assignJ
 router.get('/assigned-jobs-status', verifyToken, authorizeRoles('admin', 'technician', 'staff'), getAssignedJobsWithStatus);
 
 
-router.get('/assigned-jobs', verifyToken, authorizeRoles('technician'), newgetAssignedJobs);
+router.get('/assigned-jobs', verifyToken, authorizeRoles('technician','staff'), newgetAssignedJobs);
 
 router.post('/accept-job/:jobId', verifyToken, authorizeRoles('technician','staff'), acceptJob);
 router.post('/reject-job/:jobId', verifyToken, authorizeRoles('technician','staff'), rejectJob);
-router.post('/update-status/:jobId', verifyToken, authorizeRoles('technician'), updateJobStatus);
+router.post('/update-status/:jobId', verifyToken, authorizeRoles('technician', 'staff'), updateJobStatus);
 
 module.exports = router;

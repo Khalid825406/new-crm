@@ -3,18 +3,39 @@ const cloudinary = require('../utils/cloudinary');
 const mongoose = require('mongoose'); // ✅ This line is required
 
 
+// exports.getAssignedJobsWithStatus = async (req, res) => {
+//   try {
+//     let query = {};
+
+//     if (req.user.role === 'admin' || req.user.role === 'staff') {
+//       query = { assignedTo: { $ne: null } };
+//     } else {
+//       query = { assignedTo: req.user.id };
+//     }
+
+//     const jobs = await Job.find(query)
+//       .populate('assignedTo', 'username')
+//       .sort({ updatedAt: -1 });
+
+//     res.json(jobs);
+//   } catch (err) {
+//     console.error('❌ Error in getAssignedJobsWithStatus:', err);
+//     res.status(500).json({ message: 'Error fetching jobs' });
+//   }
+// };
+
 exports.getAssignedJobsWithStatus = async (req, res) => {
   try {
     let query = {};
 
-    if (req.user.role === 'admin' || req.user.role === 'staff') {
-      query = { assignedTo: { $ne: null } };
+    if (req.user.role === 'admin') {
+      query = { assignedTo: { $ne: null } }; // Admin sees all assigned jobs
     } else {
-      query = { assignedTo: req.user.id };
+      query = { assignedTo: req.user.id }; // Staff or Technician: jobs assigned to them
     }
 
     const jobs = await Job.find(query)
-      .populate('assignedTo', 'username')
+      .populate('assignedTo', 'username role')
       .sort({ updatedAt: -1 });
 
     res.json(jobs);
@@ -23,6 +44,8 @@ exports.getAssignedJobsWithStatus = async (req, res) => {
     res.status(500).json({ message: 'Error fetching jobs' });
   }
 };
+
+
 
 
 

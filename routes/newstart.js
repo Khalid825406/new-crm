@@ -8,7 +8,7 @@ const { verifyToken, authorizeRoles } = require('../middleware/authMiddleware');
 router.post(
   '/start-work/:jobId',
   verifyToken,
-  authorizeRoles('technician'),
+  authorizeRoles('technician','staff'),
   upload.single('image'), // multer middleware
   jobController.startWork
 );
@@ -17,7 +17,7 @@ router.post(
 router.post(
   '/complete-work/:jobId',
   verifyToken,
-  authorizeRoles('technician'),
+  authorizeRoles('technician','staff'),
   upload.single('image'), // multer middleware
   jobController.completeWork
 );
