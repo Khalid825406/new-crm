@@ -29,7 +29,11 @@ router.put('/approve-user/:id', verifyToken, authorizeRoles('admin'), approveUse
 router.delete('/reject-user/:id', verifyToken, authorizeRoles('admin'), rejectUser);
 router.get('/all-users', verifyToken, authorizeRoles('admin'), getAllUsers);
 router.get('/all-technicians', verifyToken, authorizeRoles('admin','staff'), getAllTechnicians);
-router.post('/assign-job', verifyToken, authorizeRoles('admin','staff'), assignJobToTechnician);
+router.post('/assign-job', verifyToken, authorizeRoles('admin', 'staff'), (req, res, next) => {
+  console.log("✅ /assign-job hit hua");
+  next();
+}, assignJobToTechnician);
+
 
 
 router.get('/assigned-jobs-status', verifyToken, authorizeRoles('admin', 'technician', 'staff'), getAssignedJobsWithStatus);

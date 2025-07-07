@@ -15,10 +15,16 @@ const newStart = require('./routes/newstart')
 const technicianRoutes = require('./routes/technicianRoutes')
 const staffRoutes = require('./routes/staffRoutes');
 
+
+
+const notificationRoutes = require('./routes/notificationRoutes'); 
+
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+
 
 // Route prefixes
 app.use('/api/auth', authRoutes);
@@ -32,6 +38,8 @@ app.use('/api/technician', technicianRoutes);
 app.use('/api', otpRoutes);
 
 app.use('/api/staff', staffRoutes);
+
+app.use('/api/notifications', notificationRoutes); 
 
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -49,3 +57,4 @@ mongoose.connect(process.env.MONGO_URI)
     });
   })
   .catch(err => console.error(' MongoDB connection error:', err));
+  

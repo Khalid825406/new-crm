@@ -2,6 +2,7 @@
 const User = require('../models/User');
 const Job = require('../models/Job');
 const twilio = require('twilio');
+const sendNotification = require('../utils/sendNotification');
 
 
 const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
@@ -67,42 +68,101 @@ exports.getAllTechnicians = async (req, res) => {
   }
 };
 
+// exports.assignJobToTechnician = async (req, res) => {
+//   const { jobId, technicianId } = req.body;
+
+//   try {
+//     const job = await Job.findById(jobId);
+//     if (!job) return res.status(404).json({ message: 'Job not found' });
+
+//     const assignee = await User.findById(technicianId);
+//     if (!assignee || !['technician', 'staff'].includes(assignee.role)) {
+//       return res.status(400).json({ message: 'Invalid technician or staff' });
+//     }
+
+//     // ✅ Clear any previous 'Rejected' status
+//     job.statusTimeline = job.statusTimeline.filter(entry => entry.status !== 'Rejected');
+
+//     job.assignedTo = technicianId;
+//     job.status = 'Assigned';
+//     job.assignedAt = new Date();
+//     job.statusTimeline.push({ status: 'Assigned', timestamp: new Date() });
+
+//     await job.save();
+
+//     // ✅ Optional WhatsApp Message if phone exists and starts with +
+//     if (assignee.phone && assignee.phone.startsWith('+')) {
+//       const messageBody = `👨‍🔧 New Job Assigned!\n\nLocation: ${job.location}\nCustomer: ${job.customerName}\n\nPlease login to view and accept: https://frontcrm-kappa.vercel.app/login`;
+
+//       await client.messages.create({
+//         from: process.env.TWILIO_WHATSAPP_NUMBER,
+//         to: `whatsapp:${assignee.phone}`,
+//         body: messageBody
+//       });
+//     }
+
+//     res.json({ message: 'Job assigned successfully' });
+//   } catch (err) {
+//     console.error('Error assigning job:', err);
+//     res.status(500).json({ message: 'Server error' });
+//   }
+// };
+
+
 exports.assignJobToTechnician = async (req, res) => {
   const { jobId, technicianId } = req.body;
+  console.log("🔥 Body received:", req.body);
 
   try {
     const job = await Job.findById(jobId);
-    if (!job) return res.status(404).json({ message: 'Job not found' });
+    if (!job) {
+      console.log("❌ Job not found");
+      return res.status(404).json({ message: 'Job not found' });
+    }
 
     const assignee = await User.findById(technicianId);
+    if (!assignee) {
+      console.log("❌ Technician not found");
+    } else {
+      console.log("👤 Assignee found:", assignee.username);
+    }
+
     if (!assignee || !['technician', 'staff'].includes(assignee.role)) {
       return res.status(400).json({ message: 'Invalid technician or staff' });
     }
 
-    // ✅ Clear any previous 'Rejected' status
     job.statusTimeline = job.statusTimeline.filter(entry => entry.status !== 'Rejected');
-
     job.assignedTo = technicianId;
     job.status = 'Assigned';
     job.assignedAt = new Date();
     job.statusTimeline.push({ status: 'Assigned', timestamp: new Date() });
 
     await job.save();
+    console.log("✅ Job assigned and saved");
 
-    // ✅ Optional WhatsApp Message if phone exists and starts with +
     if (assignee.phone && assignee.phone.startsWith('+')) {
-      const messageBody = `👨‍🔧 New Job Assigned!\n\nLocation: ${job.location}\nCustomer: ${job.customerName}\n\nPlease login to view and accept: https://frontcrm-kappa.vercel.app/login`;
+      const messageBody = `👨‍🔧 New Job Assigned!\n\nLocation: ${job.location}\nCustomer: ${job.customerName}\n\nLogin to view: https://frontcrm-kappa.vercel.app/login`;
 
       await client.messages.create({
         from: process.env.TWILIO_WHATSAPP_NUMBER,
         to: `whatsapp:${assignee.phone}`,
-        body: messageBody
+        body: messageBody,
       });
+      console.log("📤 WhatsApp message sent");
+    }
+
+    if (assignee.fcmToken) {
+      await sendNotification(
+        assignee.fcmToken,
+        "🛠️ New Job Assigned",
+        `You have a new job for ${job.customerName} at ${job.location}`
+      );
+      console.log("📲 Push notification sent");
     }
 
     res.json({ message: 'Job assigned successfully' });
   } catch (err) {
-    console.error('Error assigning job:', err);
+    console.error('🔥 Error in assignJobToTechnician:', err.message);
     res.status(500).json({ message: 'Server error' });
   }
 };

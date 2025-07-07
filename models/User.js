@@ -6,7 +6,8 @@ const userSchema = new mongoose.Schema({
   phone: { type: String, required: true }, // ✅ Add this
   role: { type: String, enum: ['admin', 'staff', 'technician'], required: true },
   approved: { type: Boolean, default: false },
-  rejected: { type: Boolean, default: false }
+  rejected: { type: Boolean, default: false },
+  fcmToken: { type: String, default: '' },
 });
 
 
