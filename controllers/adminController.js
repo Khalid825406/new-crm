@@ -102,7 +102,7 @@ exports.assignJobToTechnician = async (req, res) => {
     console.log("✅ Job assigned and saved");
 
     if (assignee.phone && assignee.phone.startsWith('+')) {
-      const messageBody = `👨‍🔧 New Job Assigned!\n\nLocation: ${job.location}\nCustomer: ${job.customerName}\n\nLogin to view: https://frontcrm-kappa.vercel.app/login`;
+      const messageBody = `👨‍🔧 New Job Assigned!\n\nLocation: ${job.location}\nCustomer: ${job.customerName}\n\nLogin to view: https://www.sultanmedical-crm.com/login`;
 
       await client.messages.create({
         from: process.env.TWILIO_WHATSAPP_NUMBER,
