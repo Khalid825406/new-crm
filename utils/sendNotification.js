@@ -1,25 +1,18 @@
-const admin = require('./firebaseAdmin'); // shared initialized admin SDK
+const admin = require('./firebaseAdmin'); // initialized firebase-admin
 
 const sendNotification = async (fcmToken, title, body, options = {}) => {
   try {
     const message = {
       token: fcmToken,
-      notification: {
+      data: {
         title,
         body,
-      },
-      data: {
-        click_action: options.click_action || 'https://www.sultanmedical-crm.com/technician/dashboard'
-      },
-      webpush: {
-        notification: {
-          click_action: options.click_action || 'https://www.sultanmedical-crm.com/technician/dashboard',
-        },
+        click_action: options.click_action || 'https://www.sultanmedical-crm.com/technician/dashboard',
       },
     };
 
     const response = await admin.messaging().send(message);
-    console.log("✅ FCM sent:", response);
+    console.log("✅ FCM data-only message sent:", response);
   } catch (error) {
     console.error("❌ FCM Error:", error);
   }
