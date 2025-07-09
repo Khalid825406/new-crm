@@ -116,7 +116,10 @@ exports.assignJobToTechnician = async (req, res) => {
       await sendNotification(
         assignee.fcmToken,
         "🛠️ New Job Assigned",
-        `You have a new job for ${job.customerName} at ${job.location}`
+        `You have a new job for ${job.customerName} at ${job.location}`,
+          {
+            click_action: "https://www.sultanmedical-crm.com/technician/jobs" // ✅ APK yahan redirect karega
+          }
       );
       console.log("📲 Push notification sent");
     }
