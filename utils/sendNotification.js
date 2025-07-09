@@ -1,4 +1,4 @@
-const admin = require('./firebaseAdmin');
+const admin = require('./firebaseAdmin'); // shared initialized admin SDK
 
 const sendNotification = async (fcmToken, title, body, options = {}) => {
   try {
@@ -8,9 +8,12 @@ const sendNotification = async (fcmToken, title, body, options = {}) => {
         title,
         body,
       },
+      data: {
+        click_action: options.click_action || 'https://www.sultanmedical-crm.com/technician/dashboard'
+      },
       webpush: {
         notification: {
-          click_action: options.click_action || 'https://www.sultanmedical-crm.com/technician/dashboard', // 🔗 Default fallback
+          click_action: options.click_action || 'https://www.sultanmedical-crm.com/technician/dashboard',
         },
       },
     };
