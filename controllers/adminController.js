@@ -70,6 +70,67 @@ exports.getAllTechnicians = async (req, res) => {
 
 
 
+// exports.assignJobToTechnician = async (req, res) => {
+//   const { jobId, technicianId } = req.body;
+//   console.log("🔥 Body received:", req.body);
+
+//   try {
+//     const job = await Job.findById(jobId);
+//     if (!job) {
+//       console.log("❌ Job not found");
+//       return res.status(404).json({ message: 'Job not found' });
+//     }
+
+//     const assignee = await User.findById(technicianId);
+//     if (!assignee) {
+//       console.log("❌ Technician not found");
+//     } else {
+//       console.log("👤 Assignee found:", assignee.username);
+//     }
+
+//     if (!assignee || !['technician', 'staff'].includes(assignee.role)) {
+//       return res.status(400).json({ message: 'Invalid technician or staff' });
+//     }
+
+//     job.statusTimeline = job.statusTimeline.filter(entry => entry.status !== 'Rejected');
+//     job.assignedTo = technicianId;
+//     job.status = 'Assigned';
+//     job.assignedAt = new Date();
+//     job.statusTimeline.push({ status: 'Assigned', timestamp: new Date() });
+
+//     await job.save();
+//     console.log("✅ Job assigned and saved");
+
+//     if (assignee.phone && assignee.phone.startsWith('+')) {
+//       const messageBody = `👨‍🔧 New Job Assigned!\n\nLocation: ${job.location}\nCustomer: ${job.customerName}\n\nLogin to view: https://www.sultanmedical-crm.com/login`;
+
+//       await client.messages.create({
+//         from: process.env.TWILIO_WHATSAPP_NUMBER,
+//         to: `whatsapp:${assignee.phone}`,
+//         body: messageBody,
+//       });
+//       console.log("📤 WhatsApp message sent");
+//     }
+
+//     if (assignee.fcmToken) {
+//       await sendNotification(
+//         assignee.fcmToken,
+//         "🛠️ New Job Assigned",
+//         `You have a new job for ${job.customerName} at ${job.location}`,
+//           {
+//             click_action: "https://www.sultanmedical-crm.com/technician/dashboard" // ✅ APK yahan redirect karega
+//           }
+//       );
+//       console.log("📲 Push notification sent");
+//     }
+
+//     res.json({ message: 'Job assigned successfully' });
+//   } catch (err) {
+//     console.error('🔥 Error in assignJobToTechnician:', err.message);
+//     res.status(500).json({ message: 'Server error' });
+//   }
+// };
+
 exports.assignJobToTechnician = async (req, res) => {
   const { jobId, technicianId } = req.body;
   console.log("🔥 Body received:", req.body);
@@ -84,11 +145,10 @@ exports.assignJobToTechnician = async (req, res) => {
     const assignee = await User.findById(technicianId);
     if (!assignee) {
       console.log("❌ Technician not found");
-    } else {
-      console.log("👤 Assignee found:", assignee.username);
+      return res.status(404).json({ message: 'Technician not found' });
     }
 
-    if (!assignee || !['technician', 'staff'].includes(assignee.role)) {
+    if (!['technician', 'staff'].includes(assignee.role)) {
       return res.status(400).json({ message: 'Invalid technician or staff' });
     }
 
@@ -101,6 +161,7 @@ exports.assignJobToTechnician = async (req, res) => {
     await job.save();
     console.log("✅ Job assigned and saved");
 
+    // Send WhatsApp
     if (assignee.phone && assignee.phone.startsWith('+')) {
       const messageBody = `👨‍🔧 New Job Assigned!\n\nLocation: ${job.location}\nCustomer: ${job.customerName}\n\nLogin to view: https://www.sultanmedical-crm.com/login`;
 
@@ -109,17 +170,19 @@ exports.assignJobToTechnician = async (req, res) => {
         to: `whatsapp:${assignee.phone}`,
         body: messageBody,
       });
+
       console.log("📤 WhatsApp message sent");
     }
 
+    // Send FCM
     if (assignee.fcmToken) {
       await sendNotification(
         assignee.fcmToken,
         "🛠️ New Job Assigned",
         `You have a new job for ${job.customerName} at ${job.location}`,
-          {
-            click_action: "https://www.sultanmedical-crm.com/technician/dashboard" // ✅ APK yahan redirect karega
-          }
+        {
+          click_action: "https://www.sultanmedical-crm.com/technician/dashboard"
+        }
       );
       console.log("📲 Push notification sent");
     }
@@ -130,8 +193,6 @@ exports.assignJobToTechnician = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
-
-
 exports.deleteUser = async (req, res) => {
   try {
     await User.findByIdAndDelete(req.params.id);
