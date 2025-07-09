@@ -8,6 +8,7 @@ const {
   getAllUsers,
   getAllTechnicians,
   assignJobToTechnician,
+  deleteUser,
 } = require('../controllers/adminController');
 
 const {
@@ -44,5 +45,7 @@ router.get('/assigned-jobs', verifyToken, authorizeRoles('technician','staff'), 
 router.post('/accept-job/:jobId', verifyToken, authorizeRoles('technician','staff'), acceptJob);
 router.post('/reject-job/:jobId', verifyToken, authorizeRoles('technician','staff'), rejectJob);
 router.post('/update-status/:jobId', verifyToken, authorizeRoles('technician', 'staff'), updateJobStatus);
+
+router.delete('/delete-user/:id', verifyToken , deleteUser)
 
 module.exports = router;

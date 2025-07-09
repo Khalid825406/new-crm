@@ -68,45 +68,6 @@ exports.getAllTechnicians = async (req, res) => {
   }
 };
 
-// exports.assignJobToTechnician = async (req, res) => {
-//   const { jobId, technicianId } = req.body;
-
-//   try {
-//     const job = await Job.findById(jobId);
-//     if (!job) return res.status(404).json({ message: 'Job not found' });
-
-//     const assignee = await User.findById(technicianId);
-//     if (!assignee || !['technician', 'staff'].includes(assignee.role)) {
-//       return res.status(400).json({ message: 'Invalid technician or staff' });
-//     }
-
-//     // ✅ Clear any previous 'Rejected' status
-//     job.statusTimeline = job.statusTimeline.filter(entry => entry.status !== 'Rejected');
-
-//     job.assignedTo = technicianId;
-//     job.status = 'Assigned';
-//     job.assignedAt = new Date();
-//     job.statusTimeline.push({ status: 'Assigned', timestamp: new Date() });
-
-//     await job.save();
-
-//     // ✅ Optional WhatsApp Message if phone exists and starts with +
-//     if (assignee.phone && assignee.phone.startsWith('+')) {
-//       const messageBody = `👨‍🔧 New Job Assigned!\n\nLocation: ${job.location}\nCustomer: ${job.customerName}\n\nPlease login to view and accept: https://frontcrm-kappa.vercel.app/login`;
-
-//       await client.messages.create({
-//         from: process.env.TWILIO_WHATSAPP_NUMBER,
-//         to: `whatsapp:${assignee.phone}`,
-//         body: messageBody
-//       });
-//     }
-
-//     res.json({ message: 'Job assigned successfully' });
-//   } catch (err) {
-//     console.error('Error assigning job:', err);
-//     res.status(500).json({ message: 'Server error' });
-//   }
-// };
 
 
 exports.assignJobToTechnician = async (req, res) => {
@@ -164,5 +125,15 @@ exports.assignJobToTechnician = async (req, res) => {
   } catch (err) {
     console.error('🔥 Error in assignJobToTechnician:', err.message);
     res.status(500).json({ message: 'Server error' });
+  }
+};
+
+
+exports.deleteUser = async (req, res) => {
+  try {
+    await User.findByIdAndDelete(req.params.id);
+    res.status(200).json({ message: "User deleted" });
+  } catch (err) {
+    res.status(500).json({ message: "Delete failed" });
   }
 };
