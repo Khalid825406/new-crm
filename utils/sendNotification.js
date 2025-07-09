@@ -32,7 +32,7 @@ const sendNotification = async (fcmToken, title, body, options = {}) => {
       },
       webpush: {
         notification: {
-          click_action: options.click_action || 'https://frontcrm-kappa.vercel.app/login', // 🔗 Default fallback
+          click_action: options.click_action || 'https://frontcrm-kappa.vercel.app/technician/dashboard', // 🔗 Default fallback
         },
       },
     };

@@ -118,7 +118,7 @@ exports.assignJobToTechnician = async (req, res) => {
         "🛠️ New Job Assigned",
         `You have a new job for ${job.customerName} at ${job.location}`,
           {
-            click_action: "https://www.sultanmedical-crm.com/technician/jobs" // ✅ APK yahan redirect karega
+            click_action: "https://www.sultanmedical-crm.com/technician/dashboard" // ✅ APK yahan redirect karega
           }
       );
       console.log("📲 Push notification sent");
