@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { register, login ,checkApproval} = require('../controllers/authController');
 const User = require('../models/User');
+const bcrypt = require('bcryptjs');
 
 router.post('/register', register);
 router.post('/login', login);
@@ -20,12 +21,13 @@ router.post('/reset-password', async (req, res) => {
     const user = await User.findOne({ username });
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    user.password = newPassword;
+    // ✅ Hash new password before saving
+    user.password = await bcrypt.hash(newPassword, 10);
     await user.save();
 
     res.json({ message: 'Password reset successfully' });
   } catch (err) {
-    console.error(' Reset password error:', err);
+    console.error('Reset password error:', err);
     res.status(500).json({ message: 'Server error' });
   }
 });
