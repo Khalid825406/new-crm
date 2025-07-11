@@ -22,7 +22,7 @@ const notificationRoutes = require('./routes/notificationRoutes');
 const app = express();
 
 app.use(cors({
-  origin: ['https://www.sultanmedical-crm.com'], 
+  origin: ['http://localhost:3000','https://www.sultanmedical-crm.com'], 
   credentials: true, 
 }));
 app.use(express.json());
