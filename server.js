@@ -21,7 +21,10 @@ const notificationRoutes = require('./routes/notificationRoutes');
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: ['https://www.sultanmedical-crm.com'], 
+  credentials: true, 
+}));
 app.use(express.json());
 
 
