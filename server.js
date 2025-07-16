@@ -14,6 +14,7 @@ const otpRoutes = require('./routes/otp');
 const newStart = require('./routes/newstart')
 const technicianRoutes = require('./routes/technicianRoutes')
 const staffRoutes = require('./routes/staffRoutes');
+const updateJobnew = require('./routes/updateJobs');
 
 
 
@@ -43,7 +44,7 @@ app.use('/api', otpRoutes);
 app.use('/api/staff', staffRoutes);
 
 app.use('/api/notifications', notificationRoutes); 
-
+app.use('/api', updateJobnew)
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 

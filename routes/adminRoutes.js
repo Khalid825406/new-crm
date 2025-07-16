@@ -48,4 +48,5 @@ router.post('/update-status/:jobId', verifyToken, authorizeRoles('technician', '
 
 router.delete('/delete-user/:id', verifyToken , deleteUser)
 
+
 module.exports = router;
