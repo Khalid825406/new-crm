@@ -108,6 +108,88 @@ exports.updateJobStatus = async (req, res) => {
   }
 };
 
+// exports.startWork = async (req, res) => {
+//   const { jobId } = req.params;
+//   const { remarks } = req.body;
+
+//   try {
+//     let imageUrl = '';
+
+//     if (req.file) {
+//       const result = await cloudinary.uploader.upload(req.file.path, {
+//         folder: 'technician/start',
+//       });
+//       imageUrl = result.secure_url;
+//     }
+
+//     const job = await Job.findByIdAndUpdate(
+//       jobId,
+//       {
+//         status: 'In Progress',
+//         startWork: {
+//           image: imageUrl,
+//           remark: remarks,
+//           timestamp: new Date(),
+//         },
+//         $push: {
+//           statusTimeline: {
+//             status: 'In Progress',
+//             timestamp: new Date(),
+//           },
+//         },
+//       },
+//       { new: true }
+//     );
+
+//     res.json({ message: 'Work started', job });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ error: 'Start work failed' });
+//   }
+// };
+
+
+
+// exports.completeWork = async (req, res) => {
+//   const { jobId } = req.params;
+//   const { remarks } = req.body;
+
+//   try {
+//     let imageUrl = '';
+
+//     if (req.file) {
+//       const result = await cloudinary.uploader.upload(req.file.path, {
+//         folder: 'technician/complete',
+//       });
+//       imageUrl = result.secure_url;
+//     }
+
+//     const job = await Job.findByIdAndUpdate(
+//       jobId,
+//       {
+//         status: 'Completed',
+//         completion: {
+//           image: imageUrl,
+//           remark: remarks,
+//           timestamp: new Date(),
+//         },
+//         $push: {
+//           statusTimeline: {
+//             status: 'Completed',
+//             timestamp: new Date(),
+//           },
+//         },
+//       },
+//       { new: true }
+//     );
+
+//     res.json({ message: 'Work completed', job });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ error: 'Complete work failed' });
+//   }
+// };
+
 exports.startWork = async (req, res) => {
   const { jobId } = req.params;
   const { remarks } = req.body;
@@ -122,24 +204,24 @@ exports.startWork = async (req, res) => {
       imageUrl = result.secure_url;
     }
 
-    const job = await Job.findByIdAndUpdate(
-      jobId,
-      {
-        status: 'In Progress',
-        startWork: {
-          image: imageUrl,
-          remark: remarks,
-          timestamp: new Date(),
-        },
-        $push: {
-          statusTimeline: {
-            status: 'In Progress',
-            timestamp: new Date(),
-          },
-        },
-      },
-      { new: true }
-    );
+    const job = await Job.findById(jobId);
+
+    if (!job) return res.status(404).json({ error: 'Job not found' });
+
+    // ✅ Ensure assignedTo is present
+    if (!job.assignedTo) {
+      job.assignedTo = req.user.id;
+    }
+
+    job.status = 'In Progress';
+    job.startWork = {
+      image: imageUrl,
+      remark: remarks,
+      timestamp: new Date(),
+    };
+    job.statusTimeline.push({ status: 'In Progress', timestamp: new Date() });
+
+    await job.save();
 
     res.json({ message: 'Work started', job });
   } catch (err) {
@@ -147,9 +229,6 @@ exports.startWork = async (req, res) => {
     res.status(500).json({ error: 'Start work failed' });
   }
 };
-
-
-
 exports.completeWork = async (req, res) => {
   const { jobId } = req.params;
   const { remarks } = req.body;
@@ -164,24 +243,24 @@ exports.completeWork = async (req, res) => {
       imageUrl = result.secure_url;
     }
 
-    const job = await Job.findByIdAndUpdate(
-      jobId,
-      {
-        status: 'Completed',
-        completion: {
-          image: imageUrl,
-          remark: remarks,
-          timestamp: new Date(),
-        },
-        $push: {
-          statusTimeline: {
-            status: 'Completed',
-            timestamp: new Date(),
-          },
-        },
-      },
-      { new: true }
-    );
+    const job = await Job.findById(jobId);
+
+    if (!job) return res.status(404).json({ error: 'Job not found' });
+
+    // ✅ Preserve technician identity
+    if (!job.assignedTo) {
+      job.assignedTo = req.user.id;
+    }
+
+    job.status = 'Completed';
+    job.completion = {
+      image: imageUrl,
+      remark: remarks,
+      timestamp: new Date(),
+    };
+    job.statusTimeline.push({ status: 'Completed', timestamp: new Date() });
+
+    await job.save();
 
     res.json({ message: 'Work completed', job });
   } catch (err) {

@@ -15,36 +15,27 @@ exports.getAllUserAchievements = async (req, res) => {
           jobs = await Job.find({ assignedBy: user._id.toString() });
         }
 
-        const getJobStatus = (job) => {
-          if (job.status) return job.status.trim().toLowerCase();
-          const lastTimeline = job.statusTimeline?.[job.statusTimeline.length - 1];
-          return lastTimeline?.status?.trim().toLowerCase() || '';
-        };
-
         const completedJobs = jobs.filter(j =>
-          (j.status?.trim().toLowerCase() === 'completed') ||
-          j.statusTimeline?.some(s => s.status?.trim().toLowerCase() === 'completed')
+          j.status?.toLowerCase() === 'completed' ||
+          j.statusTimeline?.some(s => s.status?.toLowerCase() === 'completed')
         );
-
 
         const rejectedJobs = jobs.filter(j =>
-          (j.status?.trim().toLowerCase() === 'rejected') ||
-          j.statusTimeline?.some(s => s.status?.trim().toLowerCase() === 'rejected')
+          j.status?.toLowerCase() === 'rejected' ||
+          j.statusTimeline?.some(s => s.status?.toLowerCase() === 'rejected')
         );
-
 
         const responseTimes = jobs.map((job) => {
           const assigned = job.statusTimeline?.find(s => s.status === 'Assigned')?.timestamp;
           const acceptedOrRejected = job.statusTimeline?.find(s =>
-            s.status === 'Accepted' || s.status === 'Rejected'
-          )?.timestamp;
+            s.status === 'Accepted' || s.status === 'Rejected')?.timestamp;
           return assigned && acceptedOrRejected
             ? (new Date(acceptedOrRejected) - new Date(assigned)) / 60000
             : null;
         }).filter(Boolean);
 
         const workDurations = jobs.map((job) => {
-          const start = job.statusTimeline?.find(s => s.status === 'In Progress' || s.status === 'Started')?.timestamp;
+          const start = job.statusTimeline?.find(s => s.status === 'In Progress')?.timestamp;
           const complete = job.statusTimeline?.find(s => s.status === 'Completed')?.timestamp;
           return start && complete
             ? (new Date(complete) - new Date(start)) / 60000
