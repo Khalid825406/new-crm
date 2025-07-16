@@ -3,26 +3,6 @@ const cloudinary = require('../utils/cloudinary');
 const mongoose = require('mongoose'); // ✅ This line is required
 
 
-// exports.getAssignedJobsWithStatus = async (req, res) => {
-//   try {
-//     let query = {};
-
-//     if (req.user.role === 'admin' || req.user.role === 'staff') {
-//       query = { assignedTo: { $ne: null } };
-//     } else {
-//       query = { assignedTo: req.user.id };
-//     }
-
-//     const jobs = await Job.find(query)
-//       .populate('assignedTo', 'username')
-//       .sort({ updatedAt: -1 });
-
-//     res.json(jobs);
-//   } catch (err) {
-//     console.error('❌ Error in getAssignedJobsWithStatus:', err);
-//     res.status(500).json({ message: 'Error fetching jobs' });
-//   }
-// };
 
 exports.getAssignedJobsWithStatus = async (req, res) => {
   try {
@@ -107,89 +87,6 @@ exports.updateJobStatus = async (req, res) => {
     res.status(500).json({ message: 'Internal server error', error: err.message });
   }
 };
-
-// exports.startWork = async (req, res) => {
-//   const { jobId } = req.params;
-//   const { remarks } = req.body;
-
-//   try {
-//     let imageUrl = '';
-
-//     if (req.file) {
-//       const result = await cloudinary.uploader.upload(req.file.path, {
-//         folder: 'technician/start',
-//       });
-//       imageUrl = result.secure_url;
-//     }
-
-//     const job = await Job.findByIdAndUpdate(
-//       jobId,
-//       {
-//         status: 'In Progress',
-//         startWork: {
-//           image: imageUrl,
-//           remark: remarks,
-//           timestamp: new Date(),
-//         },
-//         $push: {
-//           statusTimeline: {
-//             status: 'In Progress',
-//             timestamp: new Date(),
-//           },
-//         },
-//       },
-//       { new: true }
-//     );
-
-//     res.json({ message: 'Work started', job });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ error: 'Start work failed' });
-//   }
-// };
-
-
-
-// exports.completeWork = async (req, res) => {
-//   const { jobId } = req.params;
-//   const { remarks } = req.body;
-
-//   try {
-//     let imageUrl = '';
-
-//     if (req.file) {
-//       const result = await cloudinary.uploader.upload(req.file.path, {
-//         folder: 'technician/complete',
-//       });
-//       imageUrl = result.secure_url;
-//     }
-
-//     const job = await Job.findByIdAndUpdate(
-//       jobId,
-//       {
-//         status: 'Completed',
-//         completion: {
-//           image: imageUrl,
-//           remark: remarks,
-//           timestamp: new Date(),
-//         },
-//         $push: {
-//           statusTimeline: {
-//             status: 'Completed',
-//             timestamp: new Date(),
-//           },
-//         },
-//       },
-//       { new: true }
-//     );
-
-//     res.json({ message: 'Work completed', job });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ error: 'Complete work failed' });
-//   }
-// };
-
 exports.startWork = async (req, res) => {
   const { jobId } = req.params;
   const { remarks } = req.body;
