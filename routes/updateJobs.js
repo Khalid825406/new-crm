@@ -4,6 +4,7 @@ const multer = require('multer');
 const streamifier = require('streamifier');
 const cloudinary = require('cloudinary').v2;
 const Job = require('../models/Job');
+const User = require('../models/User');
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -55,6 +56,23 @@ router.put('/jobs/:id', upload.array('images'), async (req, res) => {
     res.status(500).json({ message: 'Server error while updating job' });
   }
 });
+
+router.put('/user/:id', async (req, res) => {
+  const { username, phone } = req.body;
+  try {
+    const updated = await User.findByIdAndUpdate(
+      req.params.id,
+      { username, phone },
+      { new: true, runValidators: true }
+    );
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update user' });
+  }
+});
+
+
+
 
 // ✅ Don't forget this!
 module.exports = router;
