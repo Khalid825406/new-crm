@@ -1,4 +1,8 @@
 // server.js
+const dns = require('dns');
+dns.setDefaultResultOrder('ipv4first');
+dns.setServers(['8.8.8.8', '8.8.4.4']);
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -6,6 +10,7 @@ const dotenv = require('dotenv');
 const path = require('path');
 
 dotenv.config();
+
 const jobRoute = require('./routes/jobRoute');
 const authRoutes = require('./routes/authRoutes');
 const adminRoutes = require('./routes/adminRoutes');
@@ -15,8 +20,6 @@ const newStart = require('./routes/newstart')
 const technicianRoutes = require('./routes/technicianRoutes')
 const staffRoutes = require('./routes/staffRoutes');
 const updateJobnew = require('./routes/updateJobs');
-
-
 
 const notificationRoutes = require('./routes/notificationRoutes'); 
 
@@ -35,16 +38,16 @@ app.use(cors({
 
 app.use(express.json());
 
-
-
 // Route prefixes
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/user', userRoutes); 
+
 // Routes
 app.use('/api', jobRoute); 
 app.use('/api/technician', newStart); 
 app.use('/api/technician', technicianRoutes);
+
 // 🔐 OTP routes
 app.use('/api', otpRoutes);
 
@@ -55,10 +58,10 @@ app.use('/api', updateJobnew)
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-
 app.get("/", (req, res)=>{
  res.send("Api Working...")
 })
+
 // Connect MongoDB and start server
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
